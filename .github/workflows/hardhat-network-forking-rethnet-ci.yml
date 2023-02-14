@@ -1,4 +1,4 @@
-name: Hardhat Network Forking Functionality CI
+name: Hardhat Network Forking Functionality via Rethnet CI
 
 on:
   push:
@@ -9,7 +9,8 @@ on:
       - "packages/hardhat-core/**"
       - "packages/hardhat-common/**"
       - "config/**"
-      - ".github/workflows/hardhat-network-forking-ci.yml"
+      - ".github/workflows/hardhat-network-forking-rethnet-ci.yml"
+      - "config/**"
       - "crates/**"
       - "Cargo.toml"
       - "rust-toolchain"
@@ -17,7 +18,7 @@ on:
     branches:
       - "**"
     paths:
-      - ".github/workflows/hardhat-network-forking-ci.yml"
+      - ".github/workflows/hardhat-network-forking-rethnet-ci.yml"
       - "packages/hardhat-core/**"
       - "packages/hardhat-common/**"
       - "config/**"
@@ -46,7 +47,7 @@ jobs:
   #
   # We should also understand what's going on before blindly refactoring them.
   test_fork:
-    name: Test Hardhat Network's forking functionality
+    name: Test Hardhat Network's forking functionality while using the rethnet VM mode
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -66,18 +67,13 @@ jobs:
           cache: yarn
       - name: Install
         run: yarn --frozen-lockfile
-      - name: Cache network requests
-        uses: actions/cache@v2
-        with:
-          path: |
-            packages/hardhat-core/test/internal/hardhat-network/provider/.hardhat_node_test_cache
-          key: hardhat-network-forking-tests-${{ hashFiles('yarn.lock') }}-${{ hashFiles('packages/hardhat-core/test/internal/hardhat-network/provider/node.ts') }}
       - name: Run tests
         env:
           INFURA_URL: ${{ secrets.INFURA_URL }}
           ALCHEMY_URL: ${{ secrets.ALCHEMY_URL }}
           DO_NOT_SET_THIS_ENV_VAR____IS_HARDHAT_CI: true
           FORCE_COLOR: 3
+          HARDHAT_EXPERIMENTAL_VM_MODE: rethnet
         run: |
           yarn build
           yarn test:forking
